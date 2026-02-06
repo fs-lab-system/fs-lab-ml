@@ -21,17 +21,17 @@ def fetch_data():
         path = path.replace("\\", "/")
         data = response.json()
 
-        # data persistence in file  
+        # data persistence in file
         with open(path, "w", encoding="utf-8") as f:
             json.dump(response.json(), f, indent=2)
 
         return api_success(
-                data={
-                    "path": path,
-                    "records": len(data) if isinstance(data, list) else 1,
-                }
-            )
-    
+            data={
+                "path": path,
+                "records": len(data) if isinstance(data, list) else 1,
+            }
+        )
+
     except requests.RequestException as exc:
         return api_error(
             code="FETCH_FAILED",

@@ -3,8 +3,10 @@
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
+
 def _timestamp() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
 
 def api_success(
     data: Any,
