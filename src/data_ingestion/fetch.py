@@ -9,8 +9,8 @@ from src.api_response import api_success, api_error
 
 def fetch_data():
     try:
-        # timeout -> no blocking
-        response = requests.get(DATA_SOURCE_URL, timeout=100)
+        # timeout in seconds -> no blocking
+        response = requests.get(DATA_SOURCE_URL, timeout=59)
         # error visible
         response.raise_for_status()
 
