@@ -1,0 +1,5 @@
+# Dependencies will be added incrementally
+
+
+# Base dependencies
+requests
