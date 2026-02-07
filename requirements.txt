@@ -2,7 +2,7 @@
 
 
 # Base dependencies
-requests;
-pip install supabase;
-pip install python-dotenv;
-
+# Base dependencies
+requests
+supabase
+python-dotenv
