@@ -40,6 +40,7 @@ def validate_benchmark_runs(rows: List[Dict[str, Any]]):
 
     errors: List[str] = []
 
+    # check each row in data with the schema
     for index, row in enumerate(rows):
         if not isinstance(row, dict):
             errors.append(f"Row {index} is not an object")
