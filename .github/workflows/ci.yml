@@ -25,16 +25,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Smoke test – imports
+      - name: 🔍 Smoke test – imports
         run: |
           python - <<EOF
           import src.config
           import src.api_response
+
+          # ingestion
           import src.data_ingestion.fetch
+          import src.data_ingestion.fetch_supabase
+          import src.data_ingestion.supabase_client
+
+          # inspection
           import src.data_inspection.inspect
-          print("Imports OK")
+
+          # validation
+          import src.data_validation.validate
+          import src.data_validation.validate_benchmark_runs
+
+          print("All imports OK")
           EOF
 
-      - name: Run inspection (no fetch)
+      - name: Run local inspection (no external data)
         run: |
           python -m scripts.run_inspect
