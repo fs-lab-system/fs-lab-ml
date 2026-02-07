@@ -8,14 +8,13 @@ on:
 
 jobs:
   python-ci:
-    name: Python CI (Linux)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.10
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
@@ -25,27 +24,39 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 🔍 Smoke test – imports
+      # 1️ Import-Sanity
+      - name: Import core modules
         run: |
           python - <<EOF
           import src.config
           import src.api_response
-
-          # ingestion
-          import src.data_ingestion.fetch
           import src.data_ingestion.fetch_supabase
-          import src.data_ingestion.supabase_client
-
-          # inspection
-          import src.data_inspection.inspect
-
-          # validation
-          import src.data_validation.validate
           import src.data_validation.validate_benchmark_runs
-
-          print("All imports OK")
+          import src.data_processing.aggregate_benchmark_runs
+          import src.data_processing.features_benchmark_runs
+          import src.ml.latency_regression
+          print("Imports OK")
           EOF
 
-      - name: Run local inspection (no external data)
+      # 2 Pipeline smoke test (no Supabase)
+      - name: Pipeline smoke test (mocked data)
         run: |
-          python -m scripts.run_inspect
+          python - <<EOF
+          from src.data_processing.aggregate_benchmark_runs import aggregate_by_service
+          from src.data_processing.features_benchmark_runs import build_service_features
+          from src.ml.latency_regression import train_latency_regression
+
+          rows = [
+              {"service": "a", "response_time_ms": 100, "status_code": 200},
+              {"service": "a", "response_time_ms": 200, "status_code": 200},
+              {"service": "b", "response_time_ms": 300, "status_code": 500},
+              {"service": "b", "response_time_ms": 400, "status_code": 500},
+          ]
+
+          agg = aggregate_by_service(rows)["data"]["by_service"]
+          features = build_service_features(agg)["data"]["by_service"]
+          result = train_latency_regression(features)
+
+          assert result["success"] is True
+          print("Pipeline OK")
+          EOF

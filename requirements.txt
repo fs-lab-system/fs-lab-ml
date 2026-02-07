@@ -2,8 +2,11 @@
 
 
 # Base dependencies
-# Base dependencies
 requests
 supabase
 python-dotenv
 python-dateutil
+
+# ml
+scikit-learn
+

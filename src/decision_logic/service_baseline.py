@@ -4,12 +4,14 @@ from src.api_response import api_success, api_error
 
 
 def decide_service_health(features: Dict[str, Dict[str, Any]]):
+    # protection if pipline is broken
     if not isinstance(features, dict):
         return api_error(
             code="INVALID_PAYLOAD",
             message="Expected feature dict",
         )
 
+    # final decisions of script
     decisions: Dict[str, Dict[str, Any]] = {}
 
     for service, f in features.items():

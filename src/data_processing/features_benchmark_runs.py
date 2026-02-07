@@ -1,53 +1,25 @@
 from typing import Any, Dict
 
-from src.api_response import api_success, api_error
+from src.api_response import api_success
 
 
 def build_service_features(aggregates: Dict[str, Dict[str, Any]]):
-    if not isinstance(aggregates, dict):
-        return api_error(
-            code="INVALID_PAYLOAD",
-            message="Expected aggregates dict",
-        )
-
     features: Dict[str, Dict[str, Any]] = {}
 
-    for service, metrics in aggregates.items():
-        avg_ms = metrics["avg_response_time_ms"]
-        p95_ms = metrics["p95_response_time_ms"]
-        success_rate = metrics["success_rate"]
-
-        # conversion
-        avg_s = avg_ms / 1000
-        p95_s = p95_ms / 1000
-
-        # shows instability
-        latency_ratio = p95_ms / avg_ms if avg_ms > 0 else 0
+    for service, a in aggregates.items():
+        p50 = a["p50_latency_s"]
+        p95 = a["p95_latency_s"]
+        p99 = a["p99_latency_s"]
 
         features[service] = {
-            # normalized numeric features
-            "avg_latency_s": round(avg_s, 2),
-            "p95_latency_s": round(p95_s, 2),
-            "latency_ratio": round(latency_ratio, 2),
-            "success_rate": round(success_rate, 2),
-            # derived boolean feature
-            "is_reliable": success_rate >= 0.95,
-            # categorical feature
-            "latency_class": _latency_class(p95_s),
+            # Strategy A – raw SRE percentiles
+            "p50_latency_s": p50,
+            "p95_latency_s": p95,
+            "p99_latency_s": p99,
+            # Strategy B – tail behavior
+            "tail_ratio_p95_p50": round(p95 / p50, 3) if p50 > 0 else 0.0,
+            "tail_ratio_p99_p95": round(p99 / p95, 3) if p95 > 0 else 0.0,
+            "success_rate": a["success_rate"],
         }
 
-    return api_success(
-        {
-            "by_service": features,
-        }
-    )
-
-
-def _latency_class(p95_latency_s: float) -> str:
-    if p95_latency_s < 1:
-        return "fast"
-    if p95_latency_s < 3:
-        return "acceptable"
-    if p95_latency_s < 6:
-        return "slow"
-    return "critical"
+    return api_success({"by_service": features})
