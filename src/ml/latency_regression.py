@@ -6,32 +6,40 @@ from sklearn.pipeline import Pipeline
 
 
 def train_latency_regression(features: Dict[str, Dict[str, Any]]):
+    # input-matrix / feature-matrix
     X: List[List[float]] = []
+    # # target values (ground truth)
     y: List[float] = []
+    # metadata
     services: List[str] = []
 
-    for service, f in features.items():
+    for service, feature_set in features.items():
+        # for later assignement
         services.append(service)
 
+        # keep service order for result mapping
         X.append(
             [
-                f["p50_latency_s"],
-                f["p99_latency_s"],
-                f["tail_ratio_p95_p50"],
-                f["tail_ratio_p99_p95"],
-                f["success_rate"],
+                feature_set["p50_latency_s"],
+                feature_set["p99_latency_s"],
+                feature_set["tail_ratio_p95_p50"],
+                feature_set["tail_ratio_p99_p95"],
+                feature_set["success_rate"],
             ]
         )
 
-        y.append(f["p95_latency_s"])
+        # target value we want to explain/predict
+        y.append(feature_set["p95_latency_s"])
 
+    # the ml model itself
     model = Pipeline(
         steps=[
-            ("scaler", StandardScaler()),
+            ("scaler", StandardScaler()),  # all features on same scale
             ("reg", LinearRegression()),
         ]
     )
 
+    # training
     model.fit(X, y)
 
     predictions = model.predict(X)
