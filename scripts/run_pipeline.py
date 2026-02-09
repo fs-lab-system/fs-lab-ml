@@ -5,6 +5,7 @@ from src.data_processing.aggregate_benchmark_runs import aggregate_by_service
 from src.data_processing.features_benchmark_runs import build_service_features
 import json
 
+# fetch → validate → normalize → aggregate → features → (optional ML) → persist
 if __name__ == "__main__":
     # ingestion phase
     fetch_result = fetch_benchmark_runs(limit=100)
