@@ -7,7 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  python-ci:
+  pipeline-ci:
+    name: Pipeline dry-run (Linux)
     runs-on: ubuntu-latest
 
     steps:
@@ -24,39 +25,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 1️ Import-Sanity
-      - name: Import core modules
+      - name: Run pipeline (dry-run)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
-          python - <<EOF
-          import src.config
-          import src.api_response
-          import src.data_ingestion.fetch_supabase
-          import src.data_validation.validate_benchmark_runs
-          import src.data_processing.aggregate_benchmark_runs
-          import src.data_processing.features_benchmark_runs
-          import src.ml.latency_regression
-          print("Imports OK")
-          EOF
-
-      # 2 Pipeline smoke test (no Supabase)
-      - name: Pipeline smoke test (mocked data)
-        run: |
-          python - <<EOF
-          from src.data_processing.aggregate_benchmark_runs import aggregate_by_service
-          from src.data_processing.features_benchmark_runs import build_service_features
-          from src.ml.latency_regression import train_latency_regression
-
-          rows = [
-              {"service": "a", "response_time_ms": 100, "status_code": 200},
-              {"service": "a", "response_time_ms": 200, "status_code": 200},
-              {"service": "b", "response_time_ms": 300, "status_code": 500},
-              {"service": "b", "response_time_ms": 400, "status_code": 500},
-          ]
-
-          agg = aggregate_by_service(rows)["data"]["by_service"]
-          features = build_service_features(agg)["data"]["by_service"]
-          result = train_latency_regression(features)
-
-          assert result["success"] is True
-          print("Pipeline OK")
-          EOF
+          python -m scripts.run_pipeline --dry-run
