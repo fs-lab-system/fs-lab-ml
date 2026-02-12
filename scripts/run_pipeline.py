@@ -6,6 +6,7 @@ from src.data_validation.validate_benchmark_runs import validate_benchmark_runs
 from src.data_processing.normalize_benchmark_runs import normalize_benchmark_runs
 from src.data_processing.aggregate_benchmark_runs import aggregate_by_service
 from src.data_processing.features_benchmark_runs import build_service_features
+from src.persistence.write_service_features import write_service_features
 
 
 # ------------------------
@@ -61,4 +62,5 @@ if __name__ == "__main__":
         print(json.dumps(features, indent=2))
     else:
         # later: write_features_to_supabase(features)
-        print("Pipeline completed (write mode)")
+        write_service_features(features["data"]["by_service"])
+        print("Features written to Supabase.")
