@@ -30,4 +30,4 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
-          python -m scripts.run_pipeline --dry-run
+          python -m scripts.run_pipeline --hours 24 --dry-run

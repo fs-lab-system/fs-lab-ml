@@ -10,30 +10,29 @@ from src.persistence.write_service_features import write_service_features
 
 
 # ------------------------
-# argument parsing
+# argument parsing with default
 # ------------------------
-parser = argparse.ArgumentParser(description="FS-Lab ML data pipeline")
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--hours",
+    type=int,
+    default=24,
+    help="Number of hours to look back",
+)
 
 parser.add_argument(
     "--dry-run",
     action="store_true",
-    help="Run pipeline without writing results",
 )
 
-parser.add_argument(
-    "--limit",
-    type=int,
-    default=21,
-    help="Number of benchmark runs to fetch",
-)
-
+# put parser arguments in args
 args = parser.parse_args()
 
 
 # fetch → validate → normalize → aggregate → features → (optional ML) → persist
 if __name__ == "__main__":
     # ingestion phase (limit of rows from args)
-    fetch_result = fetch_benchmark_runs(limit=args.limit)
+    fetch_result = fetch_benchmark_runs(hours=args.hours)
     if not fetch_result["success"]:
         print(json.dumps(fetch_result, indent=2))
         exit(1)
